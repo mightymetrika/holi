@@ -3,7 +3,7 @@ rstar_glm <- function(.formula, .data, .model = c("logistic", "linear", "poisson
 }
 
 rstar_glm.logistic <- function(.formula, .data, .psidesc = "Coefficient of Interest",
-                               .psival = 0, .fpsi = 2, ...) {
+                               .psival = 0, .fpsi = 2, .rstar.ci = FALSE, ...) {
 
   # Fit logistic regression model with binary outcome
   fit_glm <- stats::glm(formula = .formula, family = stats::binomial, data = .data)
@@ -86,15 +86,30 @@ rstar_glm.logistic <- function(.formula, .data, .psidesc = "Coefficient of Inter
                              datagen = sim_lgr,
                              psidesc = .psidesc,
                              ...)
+  # Get confidence intervals for r*
+  if (.rstar.ci){
+    rs_ci <- likelihoodAsy::rstar.ci(data = data_obj,
+                                     thetainit = stats::coef(fit_glm),
+                                     floglik = loglik_lgr,
+                                     fpsi = function(theta) theta[.fpsi],
+                                     fscore = grad_lgr,
+                                     datagen = sim_lgr,
+                                     psidesc = .psidesc,
+                                     ...)
+
+  } else {
+    rs_ci <- NULL
+  }
+
 
   # Build return object
-  ret <- list(rs = rs, fit_glm = fit_glm)
+  ret <- list(rs = rs, rs_ci = rs_ci, fit_glm = fit_glm)
   class(ret) <- "rstar_glm_result"
   return(ret)
 }
 
 rstar_glm.linear <- function(.formula, .data, .psidesc = "Coefficient of Interest",
-                             .psival = 0, .fpsi = 2, ...) {
+                             .psival = 0, .fpsi = 2, .rstar.ci = FALSE, ...) {
   # Fit linear regression model with Gaussian link
   fit_glm <- stats::glm(formula = .formula, family = stats::gaussian, data = .data)
 
@@ -143,14 +158,29 @@ rstar_glm.linear <- function(.formula, .data, .psidesc = "Coefficient of Interes
                              psidesc = .psidesc,
                              ...)
 
+  # Get confidence intervals for r*
+  if (.rstar.ci){
+    rs_ci <- likelihoodAsy::rstar.ci(data = data_obj,
+                                     thetainit = stats::coef(fit_glm),
+                                     floglik = loglik_lin,
+                                     fpsi = function(theta) theta[.fpsi],
+                                     fscore = grad_lin,
+                                     datagen = sim_lin,
+                                     psidesc = .psidesc,
+                                     ...)
+
+  } else {
+    rs_ci <- NULL
+  }
+
   # Build return object
-  ret <- list(rs = rs, fit_glm = fit_glm)
+  ret <- list(rs = rs, rs_ci = rs_ci, fit_glm = fit_glm)
   class(ret) <- "rstar_glm_result"
   return(ret)
 }
 
 rstar_glm.poisson <- function(.formula, .data, .psidesc = "Coefficient of Interest",
-                              .psival = 0, .fpsi = 2, ...) {
+                              .psival = 0, .fpsi = 2, .rstar.ci = FALSE, ...) {
   # Fit Poisson regression model
   fit_glm <- stats::glm(formula = .formula, family = stats::poisson, data = .data)
 
@@ -198,8 +228,23 @@ rstar_glm.poisson <- function(.formula, .data, .psidesc = "Coefficient of Intere
                              psidesc = .psidesc,
                              ...)
 
+  # Get confidence intervals for r*
+  if (.rstar.ci){
+    rs_ci <- likelihoodAsy::rstar.ci(data = data_obj,
+                                     thetainit = stats::coef(fit_glm),
+                                     floglik = loglik_pois,
+                                     fpsi = function(theta) theta[.fpsi],
+                                     fscore = grad_pois,
+                                     datagen = sim_pois,
+                                     psidesc = .psidesc,
+                                     ...)
+
+  } else {
+    rs_ci <- NULL
+  }
+
   # Build return object
-  ret <- list(rs = rs, fit_glm = fit_glm)
+  ret <- list(rs = rs, rs_ci = rs_ci, fit_glm = fit_glm)
   class(ret) <- "rstar_glm_result"
   return(ret)
 }
