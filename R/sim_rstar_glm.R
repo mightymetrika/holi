@@ -36,6 +36,11 @@ sim_rstar_glm <- function(n_main, n_covariates, true_coef_main,
   # Helper function to generate outcome variable
   generate_outcome <- function(X, true_coef, model, treatment_effect = NULL, group = NULL) {
     if (is.null(X)) return(NULL)
+
+    if(is.null(true_coef)){
+      true_coef = c(0)
+    }
+
     eta <- X %*% true_coef
     if (!is.null(treatment_effect) & !is.null(group)) {
       eta <- eta + group * treatment_effect
@@ -211,4 +216,54 @@ run_sim_rstar_glm <- function(n_sims, alpha_level = 0.05,
   summary_df[, numeric_columns] <- round(summary_df[, numeric_columns], 4)
 
   return(list(results = results_df, summary = summary_df))
+}
+
+
+# create_plots <- function(data) {
+#   # Reshape data for p-values using base R
+#   p_values <- data.frame(
+#     model = rep(c("glm_p_value", "rs_p_value"), each = nrow(data)),
+#     p_value = c(data$glm_p_value, data$rs_p_value)
+#   )
+#
+#   # Create estimate plot
+#   estimate_plot <- ggplot2::ggplot(data, ggplot2::aes(x = "", y = glm_estimate.group)) +
+#     ggplot2::geom_boxplot() +
+#     ggplot2::labs(title = "GLM Estimates", y = "Estimate", x = "") +
+#     ggplot2::theme_minimal()
+#
+#   # Create p-value plot
+#   p_value_plot <- ggplot2::ggplot(p_values, ggplot2::aes(x = model, y = p_value, fill = model)) +
+#     ggplot2::geom_boxplot() +
+#     ggplot2::labs(title = "P-values by Model", y = "P-value", x = "Model") +
+#     ggplot2::scale_fill_manual(values = c("glm_p_value" = "blue", "rs_p_value" = "red")) +
+#     ggplot2::theme_minimal()
+#
+#   list(estimate_plot = estimate_plot, p_value_plot = p_value_plot)
+# }
+
+create_plots <- function(data) {
+  # Reshape data for p-values using base R
+  p_values <- data.frame(
+    model = rep(c("glm_p_value", "rs_p_value"), each = nrow(data)),
+    p_value = c(data$glm_p_value, data$rs_p_value)
+  )
+
+  # Create estimate plot
+  estimate_plot <- ggplot2::ggplot(data, ggplot2::aes(x = "", y = glm_estimate.group)) +
+    ggplot2::geom_boxplot(outlier.shape = NA) +
+    ggplot2::geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+    ggplot2::labs(title = "GLM Estimates", y = "Estimate", x = "") +
+    ggplot2::theme_minimal()
+
+  # Create p-value plot
+  p_value_plot <- ggplot2::ggplot(p_values, ggplot2::aes(x = model, y = p_value, colour = model)) +
+    ggplot2::geom_boxplot(outlier.shape = NA) +
+    ggplot2::geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+    ggplot2::labs(title = "P-values by Model", y = "P-value", x = "Model") +
+    ggplot2::scale_color_manual(values = c("glm_p_value" = "blue", "rs_p_value" = "red")) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(legend.position="none")
+
+  list(estimate_plot = estimate_plot, p_value_plot = p_value_plot)
 }

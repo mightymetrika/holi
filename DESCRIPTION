@@ -17,8 +17,11 @@ Suggests:
 Config/testthat/edition: 3
 Imports: 
     DT,
+    ggplot2,
     likelihoodAsy,
     MASS,
+    pool,
+    RPostgres,
     shiny,
     shinythemes,
     sn
