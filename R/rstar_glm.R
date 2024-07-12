@@ -1,9 +1,60 @@
-rstar_glm <- function(.formula, .data, .model = c("logistic", "linear", "poisson"), ...) {
-  UseMethod("rstar_glm")
+#' Compute r* Statistics for Generalized Linear Models
+#'
+#' The `rstar_glm` function computes r* statistics for hypothesis testing
+#' on coefficients of interest in generalized linear models (GLMs).
+#' It supports logistic, linear, and Poisson regression models. For logistic
+#' models, the outcome must be binary.
+#'
+#' @param .formula A formula specifying the model.
+#' @param .data A data frame containing the variables in the model.
+#' @param .model The type of GLM model: "logistic", "linear", or "poisson".
+#' @param .psidesc A description of the parameter of interest.
+#' @param .psival The value of the parameter of interest under the null hypothesis.
+#' @param .fpsi The index of the parameter of interest.
+#' @param .rstar.ci Logical; if TRUE, compute confidence intervals for r*.
+#' @param ... Additional arguments passed to the likelihoodAsy functions.
+#'
+#' @return A list with the object returned from likelihoodAsy::rstar (`rs`),
+#' the object returned from likelihoodAsy::rstar.ci (`rs_ci`), and the object
+#' returned from stats::glm (`fit_glm`).
+#'
+#' @examples
+#'
+#' # Logistic model
+#' rstar_glm(law ~ DriversKilled + VanKilled + drivers + kms,
+#'           .data = Seatbelts,
+#'           .model = "logistic") |> suppressWarnings()
+#'
+#' # Poisson model
+#' rstar_glm(count ~ spray,
+#'           .data = InsectSprays,
+#'           .model = "poisson") |> suppressWarnings()
+#'
+#' # Linear model
+#' rstar_glm(mpg ~ wt + hp,
+#'           .data = mtcars,
+#'           .model = "linear") |> suppressWarnings()
+#'
+#' @references
+#' Pierce, D. A., & Bellio, R. (2017). Modern Likelihood-Frequentist Inference.
+#' International Statistical Review / Revue Internationale de Statistique, 85(3),
+#' 519–541. <doi:10.1111/insr.12232>
+#'
+#' Bellio R, Pierce D (2020). likelihoodAsy: Functions for Likelihood Asymptotics.
+#' R package version 0.51, \url{https://CRAN.R-project.org/package=likelihoodAsy}.
+#'
+#' @export
+rstar_glm <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
+                      .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
+                      .rstar.ci = FALSE, ...) {
+  UseMethod("rstar_glm", .model)
 }
 
-rstar_glm.logistic <- function(.formula, .data, .psidesc = "Coefficient of Interest",
-                               .psival = 0, .fpsi = 2, .rstar.ci = FALSE, ...) {
+#' @rdname rstar_glm
+#' @export
+rstar_glm.logistic <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
+                               .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
+                               .rstar.ci = FALSE, ...) {
 
   # Fit logistic regression model with binary outcome
   fit_glm <- stats::glm(formula = .formula, family = stats::binomial, data = .data)
@@ -108,8 +159,11 @@ rstar_glm.logistic <- function(.formula, .data, .psidesc = "Coefficient of Inter
   return(ret)
 }
 
-rstar_glm.linear <- function(.formula, .data, .psidesc = "Coefficient of Interest",
-                             .psival = 0, .fpsi = 2, .rstar.ci = FALSE, ...) {
+#' @rdname rstar_glm
+#' @export
+rstar_glm.linear <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
+                             .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
+                             .rstar.ci = FALSE, ...) {
   # Fit linear regression model with Gaussian link
   fit_glm <- stats::glm(formula = .formula, family = stats::gaussian, data = .data)
 
@@ -179,8 +233,11 @@ rstar_glm.linear <- function(.formula, .data, .psidesc = "Coefficient of Interes
   return(ret)
 }
 
-rstar_glm.poisson <- function(.formula, .data, .psidesc = "Coefficient of Interest",
-                              .psival = 0, .fpsi = 2, .rstar.ci = FALSE, ...) {
+#' @rdname rstar_glm
+#' @export
+rstar_glm.poisson <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
+                              .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
+                              .rstar.ci = FALSE, ...) {
   # Fit Poisson regression model
   fit_glm <- stats::glm(formula = .formula, family = stats::poisson, data = .data)
 
@@ -249,17 +306,18 @@ rstar_glm.poisson <- function(.formula, .data, .psidesc = "Coefficient of Intere
   return(ret)
 }
 
-rstar_glm.default <- function(.formula, .data, .model = c("logistic", "linear", "poisson"), ...) {
-  stop("Unsupported model type")
+#' @rdname rstar_glm
+#' @export
+rstar_glm.default <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
+                              .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
+                              .rstar.ci = FALSE, ...) {
+    .model <- match.arg(.model)
+    method <- paste("rstar_glm", .model, sep = ".")
+    if (!exists(method, mode = "function")) {
+      stop("Unsupported model type")
+    }
+    # do.call(method, list(.formula = .formula, .data = .data, ...))
+    do.call(method, list(.formula = .formula, .data = .data, .model = .model,
+                         .psidesc = .psidesc, .psival = .psival, .fpsi = .fpsi,
+                         .rstar.ci = .rstar.ci, ...))
 }
-
-
-rstar_glm <- function(.formula, .data, .model = c("logistic", "linear", "poisson"), ...) {
-  .model <- match.arg(.model)
-  method <- paste("rstar_glm", .model, sep = ".")
-  if (!exists(method, mode = "function")) {
-    method <- "rstar_glm.default"
-  }
-  do.call(method, list(.formula = .formula, .data = .data, ...))
-}
-
