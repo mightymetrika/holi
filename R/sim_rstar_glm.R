@@ -1,3 +1,39 @@
+#' Simulate Data and Fit GLM and r* Models
+#'
+#' This function generates simulated data for main and control groups, fits a
+#' generalized linear model (GLM) and an r* model, and returns the results.
+#'
+#' @param n_main Number of observations in the main group.
+#' @param n_covariates Number of covariates.
+#' @param true_coef_main True coefficients for the main group.
+#' @param n_control Number of observations in the control group.
+#' @param true_coef_control True coefficients for the control group.
+#' @param treatment_effect Treatment effect size.
+#' @param model Type of model: "logistic", "linear", or "poisson".
+#' @param skewness_main Skewness for the main group covariates.
+#' @param skewness_control Skewness for the control group covariates.
+#' @param Sigma_main Covariance matrix for the main group covariates.
+#' @param Sigma_control Covariance matrix for the control group covariates.
+#' @param ... Additional arguments passed to `rstar_glm`.
+#'
+#' @return A list with fitted GLM and r* models, and the simulated data.
+#'
+#' @examples
+#' sim_result <- sim_rstar_glm(
+#'   n_main = 100, n_covariates = 2, true_coef_main = c(0.5, -0.3),
+#'   n_control = 100, true_coef_control = c(0.2, -0.1),
+#'   treatment_effect = 0.5, model = "logistic"
+#' )
+#'
+#' @references
+#' Pierce, D. A., & Bellio, R. (2017). Modern Likelihood-Frequentist Inference.
+#' International Statistical Review / Revue Internationale de Statistique, 85(3),
+#' 519–541. <doi:10.1111/insr.12232>
+#'
+#' Bellio R, Pierce D (2020). likelihoodAsy: Functions for Likelihood Asymptotics.
+#' R package version 0.51, \url{https://CRAN.R-project.org/package=likelihoodAsy}.
+#'
+#' @export
 sim_rstar_glm <- function(n_main, n_covariates, true_coef_main,
                           n_control = NULL, true_coef_control = NULL,
                           treatment_effect = NULL,
@@ -116,6 +152,46 @@ sim_rstar_glm <- function(n_main, n_covariates, true_coef_main,
   return(list(rstar = fit_rstar, fit_glm = fit_glm, data = data))
 }
 
+#' Run Multiple Iterations of Simulation and Summarize Results
+#'
+#' This function runs multiple iterations of simulation for the `sim_rstar_glm`
+#' function and summarizes the results, including rejection rates, bias, empirical
+#' standard error, mean squared error, and root mean squared error.
+#'
+#' @param n_sims Number of simulations to run.
+#' @param alpha_level Significance level for hypothesis tests.
+#' @param n_main Number of observations in the main group.
+#' @param n_covariates Number of covariates.
+#' @param true_coef_main True coefficients for the main group.
+#' @param n_control Number of observations in the control group.
+#' @param true_coef_control True coefficients for the control group.
+#' @param treatment_effect Treatment effect size.
+#' @param model Type of model: "logistic", "linear", or "poisson".
+#' @param skewness_main Skewness for the main group covariates.
+#' @param skewness_control Skewness for the control group covariates.
+#' @param Sigma_main Covariance matrix for the main group covariates.
+#' @param Sigma_control Covariance matrix for the control group covariates.
+#' @param ... Additional arguments passed to `sim_rstar_glm`.
+#'
+#' @return A list with the results of each simulation and a summary of the results.
+#'
+#' @examples
+#' sim_summary <- run_sim_rstar_glm(
+#'   n_sims = 3, alpha_level = 0.05,
+#'   n_main = 100, n_covariates = 2, true_coef_main = c(0.5, -0.3),
+#'   n_control = 100, true_coef_control = c(0.2, -0.1),
+#'   treatment_effect = 0.5, model = "logistic"
+#' )
+#'
+#' @references
+#' Pierce, D. A., & Bellio, R. (2017). Modern Likelihood-Frequentist Inference.
+#' International Statistical Review / Revue Internationale de Statistique, 85(3),
+#' 519–541. <doi:10.1111/insr.12232>
+#'
+#' Bellio R, Pierce D (2020). likelihoodAsy: Functions for Likelihood Asymptotics.
+#' R package version 0.51, \url{https://CRAN.R-project.org/package=likelihoodAsy}.
+#'
+#' @export
 run_sim_rstar_glm <- function(n_sims, alpha_level = 0.05,
                               n_main, n_covariates, true_coef_main,
                               n_control = NULL, true_coef_control = NULL,
@@ -218,30 +294,16 @@ run_sim_rstar_glm <- function(n_sims, alpha_level = 0.05,
   return(list(results = results_df, summary = summary_df))
 }
 
-
-# create_plots <- function(data) {
-#   # Reshape data for p-values using base R
-#   p_values <- data.frame(
-#     model = rep(c("glm_p_value", "rs_p_value"), each = nrow(data)),
-#     p_value = c(data$glm_p_value, data$rs_p_value)
-#   )
-#
-#   # Create estimate plot
-#   estimate_plot <- ggplot2::ggplot(data, ggplot2::aes(x = "", y = glm_estimate.group)) +
-#     ggplot2::geom_boxplot() +
-#     ggplot2::labs(title = "GLM Estimates", y = "Estimate", x = "") +
-#     ggplot2::theme_minimal()
-#
-#   # Create p-value plot
-#   p_value_plot <- ggplot2::ggplot(p_values, ggplot2::aes(x = model, y = p_value, fill = model)) +
-#     ggplot2::geom_boxplot() +
-#     ggplot2::labs(title = "P-values by Model", y = "P-value", x = "Model") +
-#     ggplot2::scale_fill_manual(values = c("glm_p_value" = "blue", "rs_p_value" = "red")) +
-#     ggplot2::theme_minimal()
-#
-#   list(estimate_plot = estimate_plot, p_value_plot = p_value_plot)
-# }
-
+#' Create Diagnostic Plots for Simulation Results
+#'
+#' This internal function creates diagnostic plots for the results of the simulation studies,
+#' including boxplots for GLM estimates and p-values.
+#'
+#' @param data Data frame containing the results of the simulation studies.
+#'
+#' @return A list with ggplot2 objects for the estimate and p-value plots.
+#'
+#' @keywords internal
 create_plots <- function(data) {
   # Reshape data for p-values using base R
   p_values <- data.frame(

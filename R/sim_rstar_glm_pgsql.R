@@ -1,3 +1,39 @@
+#' Shiny App for Running r* GLM Simulations with PostgreSQL Integration
+#'
+#' This function launches a Shiny application for setting up and running simulations
+#' based on the `rstar_glm` function. The app allows users to input parameters for the
+#' simulation, run the simulation, view results, and save results to a PostgreSQL database.
+#'
+#' @param dbname The name of the PostgreSQL database.
+#' @param datatable The name of the table in the PostgreSQL database to save the results.
+#' @param host The host of the PostgreSQL database.
+#' @param port The port of the PostgreSQL database.
+#' @param user The username for accessing the PostgreSQL database.
+#' @param password The password for accessing the PostgreSQL database.
+#'
+#' @return A Shiny app object that can be run locally.
+#'
+#' @examples
+#' if (interactive()) {
+#'   sim_rstar_glm_pgsql(
+#'     dbname = "mydb",
+#'     datatable = "simulation_results",
+#'     host = "localhost",
+#'     port = 5432,
+#'     user = "myuser",
+#'     password = "mypassword"
+#'   )
+#' }
+#'
+#' @references
+#' Pierce, D. A., & Bellio, R. (2017). Modern Likelihood-Frequentist Inference.
+#' International Statistical Review / Revue Internationale de Statistique, 85(3),
+#' 519–541. <doi:10.1111/insr.12232>
+#'
+#' Bellio R, Pierce D (2020). likelihoodAsy: Functions for Likelihood Asymptotics.
+#' R package version 0.51, \url{https://CRAN.R-project.org/package=likelihoodAsy}.
+#'
+#' @export
 sim_rstar_glm_pgsql <- function(dbname, datatable, host, port, user, password) {
 
   # Helper function to
@@ -100,18 +136,10 @@ sim_rstar_glm_pgsql <- function(dbname, datatable, host, port, user, password) {
         shiny::actionButton("submit", "Submit"),
         shiny::br(),  # Add a line break
         shiny::br(),  # Add a line break
-        shiny::downloadButton("downloadBtn", "Download Data")
+        shiny::downloadButton("downloadBtn", "Download Data"),
+        shiny::actionButton("show_citations", "Citations")
       ),
       shiny::mainPanel(
-        # # Conditionally display the Simulation Results header and table
-        # shiny::uiOutput("simulation_results_header"),
-        # DT::DTOutput("resultsTable"),
-        # shiny::br(),  # Add a line break
-        # shiny::br(),  # Add a line break
-        # # Add a header for the responses table
-        # shiny::div(
-        #   shiny::h4("All Responses"),
-        #   DT::DTOutput("responses")
         shiny::uiOutput("simulation_results_header"),
         DT::DTOutput("resultsTable"),
         shiny::br(),
@@ -122,18 +150,15 @@ sim_rstar_glm_pgsql <- function(dbname, datatable, host, port, user, password) {
         shiny::div(
           shiny::h4("All Responses"),
           DT::DTOutput("responses")
-        )
+        ),
+        shiny::uiOutput("citation_header"),
+        shiny::verbatimTextOutput("citations_output")
       )
     )
   )
 
   # Define the server logic
   server <- function(input, output, session) {
-
-    # # Render the UI for parameters based on the selected cell block
-    # output$paramsUI <- shiny::renderUI({
-    #   getUIParams_pgsql(input$cellBlock)
-    # })
 
     # Reactive value to store the results
     results <- shiny::reactiveVal(data.frame())     #For display
@@ -261,6 +286,39 @@ sim_rstar_glm_pgsql <- function(dbname, datatable, host, port, user, password) {
         utils::write.csv(loadData(), file, row.names = FALSE)
       }
     )
+
+    # Initialize citations_text as an empty string
+    citations_text <- shiny::reactiveVal("")
+
+    shiny::observeEvent(input$show_citations, {
+      # Get the formatted citations
+      likelihoodAsy_citation <- format_citation(utils::citation("likelihoodAsy"))
+      holi_citation <- format_citation(utils::citation("holi"))
+
+      citations <- paste(
+        "Statistical Methods:",
+        "Pierce, D.A. and Bellio, R. (2017). Modern likelihood-frequentist inference. International Statistical Review, 85, 519-541.",
+        "",
+        "likelihoodAsy Package:",
+        likelihoodAsy_citation,
+        "",
+        "Web Application:",
+        holi_citation,
+        sep = "\n"
+      )
+      citations_text(citations)
+    })
+
+
+    # Render the citations output
+    output$citations_output <- shiny::renderText({
+      citations_text()
+    })
+
+    output$citation_header <- shiny::renderUI({
+      shiny::req(citations_text())
+      shiny::tags$h2("Citations")
+    })
   }
 
   # Run the application

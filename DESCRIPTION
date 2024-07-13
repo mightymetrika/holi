@@ -1,10 +1,21 @@
 Package: holi
-Title: What the Package Does (One Line, Title Case)
+Title: Higher Order Likelihood Inference Web Applications
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Authors@R: c(
+    person("Mackson", "Ncube", , "macksonncube.stats@gmail.com", role = c("aut", "cre")),
+    person("mightymetrika, LLC", role = c("cph", "fnd"))
+  )
+Description: Higher order likelihood inference is a promising development for the
+    analysis of small sample size data. The holi package provides web applications
+    for higher order likelihood inference using select generalized linear models.
+    The 'holi' package currently supports linear, logistic, and Poisson models
+    through the rstar_glm() function. The rstar_glm() function is based on Pierce
+    and Bellio (2017) <doi:10.1111/insr.12232> and it calls the
+    likelihoodAsy::rstar() function internally. The LA_rstar() function launches
+    an interactive 'shiny' application which allows users to fit rstar_glm()
+    models in their web browser. The sim_rstar_glm_pgsql() streamlines the process
+    of launching a web-based 'shiny' simulation application which saves results
+    to a user created 'PostgreSQL' database.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8

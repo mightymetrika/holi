@@ -1,3 +1,26 @@
+#' Launch Shiny App for likelihoodAsy rstar Analysis
+#'
+#' This function launches a Shiny application that facilitates the setup and execution
+#' of likelihoodAsy rstar analysis. The app allows users to upload a dataset, specify a
+#' model and parameters of interest, and perform the analysis with the option to compute
+#' confidence intervals for r* statistics.
+#'
+#' @return A Shiny app object that can be run locally.
+#'
+#' @examples
+#' if (interactive()) {
+#'   LA_rstar()
+#' }
+#'
+#' @references
+#' Pierce, D. A., & Bellio, R. (2017). Modern Likelihood-Frequentist Inference.
+#' International Statistical Review / Revue Internationale de Statistique, 85(3),
+#' 519–541. <doi:10.1111/insr.12232>
+#'
+#' Bellio R, Pierce D (2020). likelihoodAsy: Functions for Likelihood Asymptotics.
+#' R package version 0.51, \url{https://CRAN.R-project.org/package=likelihoodAsy}.
+#'
+#' @export
 LA_rstar <- function() {
   # UI
   ui <- shiny::fluidPage(
@@ -215,13 +238,19 @@ LA_rstar <- function() {
     citations_text <- shiny::reactiveVal("")
 
     shiny::observeEvent(input$show_citations, {
+      # Get the formatted citations
+      likelihoodAsy_citation <- format_citation(utils::citation("likelihoodAsy"))
+      holi_citation <- format_citation(utils::citation("holi"))
+
       citations <- paste(
         "Statistical Methods:",
         "Pierce, D.A. and Bellio, R. (2017). Modern likelihood-frequentist inference. International Statistical Review, 85, 519-541.",
         "",
+        "likelihoodAsy Package:",
+        likelihoodAsy_citation,
+        "",
         "Web Application:",
-        "  Last F (????). holi: What the Package Does (One Line, Title Case). R package version 0.0.0.9000,",
-        "  https://github.com/mightymetrika/holi",
+        holi_citation,
         sep = "\n"
       )
       citations_text(citations)
@@ -241,4 +270,37 @@ LA_rstar <- function() {
   }
 
   shiny::shinyApp(ui = ui, server = server)
+}
+
+#' Format Citation
+#'
+#' This internal function formats a citation object into a readable string.
+#' The function extracts relevant information such as the title, author,
+#' year, address, and URL from the citation object and formats it into a
+#' standardized citation format.
+#'
+#' @param cit A citation object typically obtained from `citation()`.
+#'
+#' @return A character string with the formatted citation.
+#'
+#' @keywords internal
+format_citation <- function(cit) {
+  title <- cit$title
+  author <- if (is.null(cit$author)) {
+    cit$organization
+  } else {
+    paste(sapply(cit$author, function(a) paste(a$given, a$family)), collapse = ", ")
+  }
+  year <- cit$year
+  address <- cit$address
+  url <- cit$url
+
+  formatted_cit <- paste0(
+    author, " (", year, "). ",
+    title, ". ",
+    "Retrieved from ", url, ". ",
+    address
+  )
+
+  formatted_cit
 }

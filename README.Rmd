@@ -1,0 +1,53 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# holi
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of holi is to provide web applications for higher order likelihood inference.
+
+## Installation
+
+You can install the development version of holi from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("mightymetrika/holi")
+```
+
+## Example
+
+This is a basic example which shows you how to compare the p-value from stats::glm() and the r* p-value from holi::rstar_glm() when analyzing 'mtcars'. The holi::rstar_glm() function relies on likelihoodAsy::rstar().
+
+```{r example}
+library(holi)
+
+# Fit model
+rs_linear <- rstar_glm(mpg ~ wt + hp, .data = mtcars, .model = "linear")
+
+# See results from stats::glm()
+rs_linear$fit_glm |> summary()
+
+# See r* results
+rs_linear$fit_glm |> summary()
+```
+
+In this example, the p-value for r* (5.556e-07) is smaller than the p-value for stats::glm() (1.12e-06).
+
+## References
+
+Pierce, D. A., & Bellio, R. (2017). Modern Likelihood-Frequentist Inference. International Statistical Review / Revue Internationale de Statistique, 85(3), 519–541. <doi:10.1111/insr.12232>
