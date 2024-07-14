@@ -1,0 +1,34 @@
+-- Table: public.rstarglm_data
+
+-- DROP TABLE IF EXISTS public.rstarglm_data;
+
+CREATE TABLE IF NOT EXISTS public.rstarglm_data
+(
+    model text COLLATE pg_catalog."default" NOT NULL,
+    rejection_rate real,
+    rejection_rate_se real,
+    bias real,
+    empse real,
+    mse real,
+    rmse real,
+    converged_proportion real,
+    iter integer,
+    alpha real,
+    n_covs integer,
+    n_main integer,
+    n_cont integer,
+    true_coef_main text COLLATE pg_catalog."default",
+    true_coef_control text COLLATE pg_catalog."default",
+    treatment_effect real,
+    mod text COLLATE pg_catalog."default",
+    skewness_main text COLLATE pg_catalog."default",
+    skewness_control text COLLATE pg_catalog."default",
+    sigma_main text COLLATE pg_catalog."default",
+    sigma_control text COLLATE pg_catalog."default",
+    run_code text COLLATE pg_catalog."default"
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.rstarglm_data
+    OWNER to postgres;

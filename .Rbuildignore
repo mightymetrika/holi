@@ -1,3 +1,6 @@
 ^holi\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^LICENSE\.md$
+^createtable_public.rstarglm_data\.txt$
+^cran-comments\.md$

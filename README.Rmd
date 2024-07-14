@@ -22,9 +22,15 @@ The goal of holi is to provide web applications for higher order likelihood infe
 
 ## Installation
 
+You can install the released version of 'holi' from [CRAN](https://CRAN.R-project.org):
+
+```{r eval=FALSE}
+install.packages("holi")
+```
+
 You can install the development version of holi from [GitHub](https://github.com/) with:
 
-``` r
+```{r eval=FALSE}
 # install.packages("devtools")
 devtools::install_github("mightymetrika/holi")
 ```

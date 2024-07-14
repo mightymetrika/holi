@@ -60,11 +60,11 @@ standard error, mean squared error, and root mean squared error.
 }
 \examples{
 sim_summary <- run_sim_rstar_glm(
-  n_sims = 3, alpha_level = 0.05,
+  n_sims = 2, alpha_level = 0.05,
   n_main = 100, n_covariates = 2, true_coef_main = c(0.5, -0.3),
   n_control = 100, true_coef_control = c(0.2, -0.1),
-  treatment_effect = 0.5, model = "logistic"
-)
+  treatment_effect = 1, model = "linear"
+) |> suppressWarnings()
 
 }
 \references{

@@ -56,7 +56,7 @@ sim_result <- sim_rstar_glm(
   n_main = 100, n_covariates = 2, true_coef_main = c(0.5, -0.3),
   n_control = 100, true_coef_control = c(0.2, -0.1),
   treatment_effect = 0.5, model = "logistic"
-)
+) |> suppressWarnings()
 
 }
 \references{

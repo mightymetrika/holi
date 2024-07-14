@@ -11,6 +11,13 @@ likelihood inference.
 
 ## Installation
 
+You can install the released version of ‘holi’ from
+[CRAN](https://CRAN.R-project.org):
+
+``` r
+install.packages("holi")
+```
+
 You can install the development version of holi from
 [GitHub](https://github.com/) with:
 
