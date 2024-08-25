@@ -294,10 +294,12 @@ format_citation <- function(cit) {
   year <- cit$year
   address <- cit$address
   url <- cit$url
+  note <- cit$note
 
   formatted_cit <- paste0(
     author, " (", year, "). ",
     title, ". ",
+    note, ", ",
     "Retrieved from ", url, ". ",
     address
   )

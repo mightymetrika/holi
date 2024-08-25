@@ -16,6 +16,7 @@ rstar_glm(
   .psival = 0,
   .fpsi = 2,
   .rstar.ci = FALSE,
+  trace = FALSE,
   ...
 )
 
@@ -27,6 +28,7 @@ rstar_glm(
   .psival = 0,
   .fpsi = 2,
   .rstar.ci = FALSE,
+  trace = FALSE,
   ...
 )
 
@@ -38,6 +40,7 @@ rstar_glm(
   .psival = 0,
   .fpsi = 2,
   .rstar.ci = FALSE,
+  trace = FALSE,
   ...
 )
 
@@ -49,6 +52,7 @@ rstar_glm(
   .psival = 0,
   .fpsi = 2,
   .rstar.ci = FALSE,
+  trace = FALSE,
   ...
 )
 
@@ -60,6 +64,7 @@ rstar_glm(
   .psival = 0,
   .fpsi = 2,
   .rstar.ci = FALSE,
+  trace = FALSE,
   ...
 )
 }
@@ -77,6 +82,8 @@ rstar_glm(
 \item{.fpsi}{The index of the parameter of interest.}
 
 \item{.rstar.ci}{Logical; if TRUE, compute confidence intervals for r*.}
+
+\item{trace}{Logical; if TRUE, print information about computation. (Default is FALSE)}
 
 \item{...}{Additional arguments passed to the likelihoodAsy functions.}
 }

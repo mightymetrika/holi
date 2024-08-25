@@ -212,27 +212,46 @@ run_sim_rstar_glm <- function(n_sims, alpha_level = 0.05,
                                 treatment_effect, model,
                                 skewness_main, skewness_control,
                                 Sigma_main, Sigma_control, ...)
-    if (is.null(sim_result)) return(rep(NA, 6))
+    if (is.null(sim_result)) {
+      return(NULL)
+    }
 
-    glm_coef <- sim_result$fit_glm$coefficients["group"]
-    glm_se <- summary(sim_result$fit_glm)$coefficients["group", "Std. Error"]
-    if (model %in% c("logistic", "poisson")){
-      glm_p_value <- summary(sim_result$fit_glm)$coefficients["group", "Pr(>|z|)"]
-      } else if (model == "linear"){
+    tryCatch({
+      glm_coef <- sim_result$fit_glm$coefficients["group"]
+      glm_se <- summary(sim_result$fit_glm)$coefficients["group", "Std. Error"]
+      if (model %in% c("logistic", "poisson")) {
+        glm_p_value <- summary(sim_result$fit_glm)$coefficients["group", "Pr(>|z|)"]
+      } else if (model == "linear") {
         glm_p_value <- summary(sim_result$fit_glm)$coefficients["group", "Pr(>|t|)"]
       }
-    rs_estimate <- sim_result$rstar$rs$theta.hat["group"]
+      rs_estimate <- sim_result$rstar$rs$theta.hat["group"]
+      rs_p_value <- stats::pnorm(sim_result$rstar$rs$rs)
 
-    c(
-      glm_estimate = glm_coef,
-      glm_p_value = glm_p_value,
-      rs_estimate = rs_estimate,
-      rs_p_value = stats::pnorm(sim_result$rstar$rs$rs),
-      glm_se = glm_se
-    )
-  }, simplify = "matrix")
+      c(
+        glm_estimate = glm_coef,
+        glm_p_value = glm_p_value,
+        rs_estimate = rs_estimate,
+        rs_p_value = rs_p_value,
+        glm_se = glm_se
+      )
+    }, error = function(e) {
+      return(NULL)
+    })
+  }, simplify = FALSE)
 
-  results_df <- as.data.frame(t(results))
+  # Remove NULL results
+  valid_results <- results[!sapply(results, is.null)]
+
+  if (length(valid_results) == 0) {
+    return(NULL)
+  }
+
+  results_df <- as.data.frame(do.call(rbind, valid_results))
+
+  if (nrow(results_df) == 0) {
+    return(NULL)
+  }
+
   converged <- stats::complete.cases(results_df)
   results_df <- results_df[converged, ]
 

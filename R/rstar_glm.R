@@ -12,6 +12,7 @@
 #' @param .psival The value of the parameter of interest under the null hypothesis.
 #' @param .fpsi The index of the parameter of interest.
 #' @param .rstar.ci Logical; if TRUE, compute confidence intervals for r*.
+#' @param trace Logical; if TRUE, print information about computation. (Default is FALSE)
 #' @param ... Additional arguments passed to the likelihoodAsy functions.
 #'
 #' @return A list with the object returned from likelihoodAsy::rstar (`rs`),
@@ -46,7 +47,7 @@
 #' @export
 rstar_glm <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
                       .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
-                      .rstar.ci = FALSE, ...) {
+                      .rstar.ci = FALSE, trace = FALSE, ...) {
   UseMethod("rstar_glm", .model)
 }
 
@@ -54,7 +55,7 @@ rstar_glm <- function(.formula, .data, .model = c("logistic", "linear", "poisson
 #' @export
 rstar_glm.logistic <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
                                .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
-                               .rstar.ci = FALSE, ...) {
+                               .rstar.ci = FALSE, trace = FALSE, ...) {
 
   # Fit logistic regression model with binary outcome
   fit_glm <- stats::glm(formula = .formula, family = stats::binomial, data = .data)
@@ -136,6 +137,7 @@ rstar_glm.logistic <- function(.formula, .data, .model = c("logistic", "linear",
                              fscore = grad_lgr,
                              datagen = sim_lgr,
                              psidesc = .psidesc,
+                             trace = if(interactive()) trace else FALSE,
                              ...)
   # Get confidence intervals for r*
   if (.rstar.ci){
@@ -146,6 +148,7 @@ rstar_glm.logistic <- function(.formula, .data, .model = c("logistic", "linear",
                                      fscore = grad_lgr,
                                      datagen = sim_lgr,
                                      psidesc = .psidesc,
+                                     trace = if(interactive()) trace else FALSE,
                                      ...)
 
   } else {
@@ -163,7 +166,7 @@ rstar_glm.logistic <- function(.formula, .data, .model = c("logistic", "linear",
 #' @export
 rstar_glm.linear <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
                              .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
-                             .rstar.ci = FALSE, ...) {
+                             .rstar.ci = FALSE, trace = FALSE, ...) {
   # Fit linear regression model with Gaussian link
   fit_glm <- stats::glm(formula = .formula, family = stats::gaussian, data = .data)
 
@@ -210,6 +213,7 @@ rstar_glm.linear <- function(.formula, .data, .model = c("logistic", "linear", "
                              fscore = grad_lin,
                              datagen = sim_lin,
                              psidesc = .psidesc,
+                             trace = if(interactive()) trace else FALSE,
                              ...)
 
   # Get confidence intervals for r*
@@ -221,6 +225,7 @@ rstar_glm.linear <- function(.formula, .data, .model = c("logistic", "linear", "
                                      fscore = grad_lin,
                                      datagen = sim_lin,
                                      psidesc = .psidesc,
+                                     trace = if(interactive()) trace else FALSE,
                                      ...)
 
   } else {
@@ -237,7 +242,7 @@ rstar_glm.linear <- function(.formula, .data, .model = c("logistic", "linear", "
 #' @export
 rstar_glm.poisson <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
                               .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
-                              .rstar.ci = FALSE, ...) {
+                              .rstar.ci = FALSE, trace = FALSE, ...) {
   # Fit Poisson regression model
   fit_glm <- stats::glm(formula = .formula, family = stats::poisson, data = .data)
 
@@ -283,6 +288,7 @@ rstar_glm.poisson <- function(.formula, .data, .model = c("logistic", "linear", 
                              fscore = grad_pois,
                              datagen = sim_pois,
                              psidesc = .psidesc,
+                             trace = if(interactive()) trace else FALSE,
                              ...)
 
   # Get confidence intervals for r*
@@ -294,6 +300,7 @@ rstar_glm.poisson <- function(.formula, .data, .model = c("logistic", "linear", 
                                      fscore = grad_pois,
                                      datagen = sim_pois,
                                      psidesc = .psidesc,
+                                     trace = if(interactive()) trace else FALSE,
                                      ...)
 
   } else {
@@ -310,7 +317,7 @@ rstar_glm.poisson <- function(.formula, .data, .model = c("logistic", "linear", 
 #' @export
 rstar_glm.default <- function(.formula, .data, .model = c("logistic", "linear", "poisson"),
                               .psidesc = "Coefficient of Interest", .psival = 0, .fpsi = 2,
-                              .rstar.ci = FALSE, ...) {
+                              .rstar.ci = FALSE, trace = FALSE, ...) {
     .model <- match.arg(.model)
     method <- paste("rstar_glm", .model, sep = ".")
     if (!exists(method, mode = "function")) {
@@ -319,5 +326,5 @@ rstar_glm.default <- function(.formula, .data, .model = c("logistic", "linear", 
     # do.call(method, list(.formula = .formula, .data = .data, ...))
     do.call(method, list(.formula = .formula, .data = .data, .model = .model,
                          .psidesc = .psidesc, .psival = .psival, .fpsi = .fpsi,
-                         .rstar.ci = .rstar.ci, ...))
+                         .rstar.ci = .rstar.ci, trace = if(interactive()) trace else FALSE, ...))
 }
